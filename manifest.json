@@ -5,6 +5,47 @@
   "new_install_skip_erase": false,
   "builds": [
     {
+      "model": "Sense360-FAN",
+      "variant": "Standard",
+      "device_type": "Fan Control",
+      "version": "1.0.0",
+      "channel": "stable",
+      "description": "Complete firmware release for the Sense360-MS multi-sensor air quality monitor including all core sensors plus Sen55x particulate matter sensor and HLK2450 radar presence detection.",
+      "chipFamily": "ESP32-S3",
+      "builtin_sensors": [
+        "LTR303",
+        "SCD41",
+        "SHT30",
+        "SPG41"
+      ],
+      "addon_sensors": [
+        "SPS30",
+        "HLK2450"
+      ],
+      "sensor_addon": null,
+      "parts": [
+        {
+          "path": "firmware/Sense360-FAN/Standard/Sense360-FAN-Standard-v1.0.0-stable.bin",
+          "offset": 0
+        }
+      ],
+      "build_date": "2025-07-17",
+      "file_size": 1073600,
+      "improv": true,
+      "features": [],
+      "hardware_requirements": [
+        "ESP32-S3 development board",
+        "LTR303 light sensor",
+        "SCD40 CO2 sensor"
+      ],
+      "known_issues": [
+        "CO2 sensor requires 3-minute warm-up period",
+        "Sen55x sensor requires 30-second initialization",
+        "HLK2450 sensor requires 10-second calibration"
+      ],
+      "changelog": []
+    },
+    {
       "model": "Sense360-MS",
       "variant": "Standard",
       "device_type": "Multi Sensor AQI",
