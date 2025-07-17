@@ -19,8 +19,7 @@
         "SPG41"
       ],
       "addon_sensors": [
-        "SPS30",
-        "HLK2450"
+        "Chip Family: ESP32-S3"
       ],
       "sensor_addon": null,
       "parts": [
