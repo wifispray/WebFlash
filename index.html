@@ -87,7 +87,7 @@
             // Update install button
             const installButton = document.querySelector('#main-installer button[slot="activate"]');
             installButton.disabled = false;
-            installButton.textContent = `Install ${build.device_type} v${build.version} (${build.chipFamily})`;
+            installButton.textContent = `Install ${build.device_type} v${build.version}`;
             
             // Create individual manifest for selected firmware
             createIndividualManifest(build, index);
@@ -99,7 +99,7 @@
             const manifestFilename = `firmware-${index}.json`;
             
             console.log('Using individual manifest:', manifestFilename);
-            console.log('Selected firmware:', build.device_type, 'v' + build.version, build.chipFamily);
+            console.log('Selected firmware:', build.device_type, 'v' + build.version);
             
             // Update the ESP Web Tools manifest attribute
             const installer = document.getElementById('main-installer');
@@ -136,9 +136,12 @@
             
             // Populate addon sensor checkboxes
             const allAddonSensors = [...new Set(globalManifest.builds.flatMap(build => build.addon_sensors || []))];
+            console.log('Addon sensors found:', allAddonSensors); // Debug logging
             const addonContainer = document.getElementById('addon-sensors-filter');
             addonContainer.innerHTML = '';
-            allAddonSensors.forEach(sensor => {
+            
+            // Only process actual addon sensors (not chip family or other fields)
+            allAddonSensors.filter(sensor => sensor && !sensor.includes('ESP32')).forEach(sensor => {
                 const checkbox = document.createElement('input');
                 checkbox.type = 'checkbox';
                 checkbox.id = `addon-${sensor}`;
@@ -189,7 +192,7 @@
                     checkedAddonSensors.every(sensor => addonSensors.includes(sensor));
                 
                 // Check search input
-                const searchText = `${deviceType} ${variant} ${chipFamily} ${version} ${channel} ${description} ${addonSensors.join(' ')}`.toLowerCase();
+                const searchText = `${deviceType} ${variant} ${version} ${channel} ${description} ${addonSensors.join(' ')}`.toLowerCase();
                 const matchesSearch = !searchInput || searchText.includes(searchInput);
                 
                 if (matchesDeviceType && matchesVariant && matchesAddonSensors && matchesSearch) {
