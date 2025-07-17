@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sense360 ESP32 Firmware Installer</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=1752760700">
     <script type="module" src="https://unpkg.com/esp-web-tools@9/dist/web/install-button.js"></script>
     <script>
         let globalManifest = null;
@@ -134,29 +134,75 @@
                 variantSelect.appendChild(option);
             });
             
-            // Populate addon sensor checkboxes
+            // Populate addon sensor checkboxes with categories
             const allAddonSensors = [...new Set(globalManifest.builds.flatMap(build => build.addon_sensors || []))];
             console.log('Addon sensors found:', allAddonSensors); // Debug logging
+            console.log('Creating categorized sensor interface...');
             const addonContainer = document.getElementById('addon-sensors-filter');
             addonContainer.innerHTML = '';
             
-            // Only process actual addon sensors (not chip family or other fields)
-            allAddonSensors.filter(sensor => sensor && !sensor.includes('ESP32')).forEach(sensor => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.id = `addon-${sensor}`;
-                checkbox.value = sensor;
-                checkbox.onchange = filterFirmware;
+            // Define sensor categories
+            const sensorCategories = {
+                'Air Quality': {
+                    sensors: ['SCD4x', 'SEN5x', 'Sen55x', 'SEN0321', 'SFA30', 'SFA40', 'SCD40', 'SPS30'],
+                    newSensors: ['SFA40']
+                },
+                'Environmental': {
+                    sensors: ['BMP390', 'BTC0'],
+                    newSensors: []
+                },
+                'Presence Detection': {
+                    sensors: ['LD2450', 'LD2410S', 'LD2412', 'HLK2450'],
+                    newSensors: []
+                }
+            };
+            
+            // Create categorized sensor groups
+            Object.entries(sensorCategories).forEach(([categoryName, categoryData]) => {
+                const availableSensors = categoryData.sensors.filter(sensor => 
+                    allAddonSensors.includes(sensor) || sensor === 'Sen55x' || sensor === 'HLK2450'
+                );
                 
-                const label = document.createElement('label');
-                label.htmlFor = `addon-${sensor}`;
-                label.textContent = sensor;
-                
-                const wrapper = document.createElement('div');
-                wrapper.className = 'sensor-checkbox';
-                wrapper.appendChild(checkbox);
-                wrapper.appendChild(label);
-                addonContainer.appendChild(wrapper);
+                if (availableSensors.length > 0) {
+                    console.log(`Creating category: ${categoryName} with sensors:`, availableSensors);
+                    // Create category header
+                    const categoryHeader = document.createElement('div');
+                    categoryHeader.className = 'sensor-category-header';
+                    categoryHeader.textContent = categoryName;
+                    addonContainer.appendChild(categoryHeader);
+                    
+                    // Create category container
+                    const categoryContainer = document.createElement('div');
+                    categoryContainer.className = 'sensor-category-container';
+                    
+                    availableSensors.forEach(sensor => {
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.id = `addon-${sensor}`;
+                        checkbox.value = sensor;
+                        checkbox.onchange = filterFirmware;
+                        
+                        const label = document.createElement('label');
+                        label.htmlFor = `addon-${sensor}`;
+                        label.textContent = sensor;
+                        
+                        // Add "new" indicator for specified sensors
+                        if (categoryData.newSensors.includes(sensor)) {
+                            const newBadge = document.createElement('span');
+                            newBadge.className = 'new-sensor-badge';
+                            newBadge.textContent = 'new';
+                            label.appendChild(newBadge);
+                        }
+                        
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'sensor-checkbox';
+                        wrapper.appendChild(checkbox);
+                        wrapper.appendChild(label);
+                        categoryContainer.appendChild(wrapper);
+                    });
+                    
+                    addonContainer.appendChild(categoryContainer);
+                }
             });
         }
         
@@ -215,6 +261,23 @@
             }
         }
         
+        // Toggle addon sensors visibility
+        function toggleAddonSensors() {
+            const container = document.getElementById('addon-sensors-filter');
+            const toggleButton = document.getElementById('addon-sensors-toggle');
+            const expandIcon = document.getElementById('expand-icon');
+            
+            if (container.classList.contains('collapsed')) {
+                container.classList.remove('collapsed');
+                expandIcon.textContent = '▲';
+                toggleButton.innerHTML = '<span id="expand-icon">▲</span> Hide Options';
+            } else {
+                container.classList.add('collapsed');
+                expandIcon.textContent = '▼';
+                toggleButton.innerHTML = '<span id="expand-icon">▼</span> Show Options';
+            }
+        }
+
         // Load firmware info when page loads
         document.addEventListener('DOMContentLoaded', loadFirmwareInfo);
     </script>
@@ -264,8 +327,13 @@
                 </div>
                 <div class="filter-row">
                     <div class="sensor-filters">
-                        <label>Addon Sensors:</label>
-                        <div id="addon-sensors-filter" class="sensor-checkboxes"></div>
+                        <div class="addon-sensors-header">
+                            <label>Addon Sensors:</label>
+                            <button id="addon-sensors-toggle" class="expand-button" onclick="toggleAddonSensors()">
+                                <span id="expand-icon">▼</span> Show Options
+                            </button>
+                        </div>
+                        <div id="addon-sensors-filter" class="sensor-checkboxes collapsed"></div>
                     </div>
                 </div>
             </div>
