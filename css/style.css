@@ -169,6 +169,7 @@ section, .firmware-info, .installation-section, .features-section, .troubleshoot
     max-height: 0;
     opacity: 0;
     margin-top: 0;
+    overflow: hidden;
 }
 
 .sensor-category-header {
