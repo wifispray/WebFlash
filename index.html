@@ -134,37 +134,45 @@
                 variantSelect.appendChild(option);
             });
             
-            // Populate addon sensor checkboxes with categories
-            const allAddonSensors = [...new Set(globalManifest.builds.flatMap(build => build.addon_sensors || []))];
-            console.log('Addon sensors found:', allAddonSensors); // Debug logging
-            console.log('Creating categorized sensor interface...');
+            // Populate expansion module checkboxes with categories
+            const allExpansionModules = [...new Set(globalManifest.builds.flatMap(build => build.addon_sensors || []))];
+            console.log('Expansion modules found:', allExpansionModules); // Debug logging
+            console.log('Creating categorized module interface...');
             const addonContainer = document.getElementById('addon-sensors-filter');
             addonContainer.innerHTML = '';
             
-            // Define sensor categories
-            const sensorCategories = {
-                'Air Quality': {
-                    sensors: ['SCD4x', 'SEN5x', 'Sen55x', 'SEN0321', 'SFA30', 'SFA40', 'SCD40', 'SPS30'],
-                    newSensors: ['SFA40']
+            // Define expansion module categories for modular platform
+            const moduleCategories = {
+                'AirIQ Module': {
+                    sensors: ['SCD4x', 'SEN5x', 'Sen55x', 'SEN0321', 'SFA30', 'SFA40', 'SCD40', 'SGP41', 'MICS4514', 'BMP390'],
+                    newSensors: ['SFA40'],
+                    description: 'Advanced air quality monitoring'
                 },
-                'Environmental': {
-                    sensors: ['BMP390', 'BTC0'],
-                    newSensors: []
+                'Comfort Module': {
+                    sensors: ['SHT40', 'LTR303', 'BMP390'],
+                    newSensors: [],
+                    description: 'Basic environmental sensing'
                 },
-                'Presence Detection': {
-                    sensors: ['LD2450', 'LD2410S', 'LD2412', 'HLK2450'],
-                    newSensors: []
+                'Presence Module': {
+                    sensors: ['LD2450', 'LD2410S', 'LD2412', 'HLK2450', 'SEN0609'],
+                    newSensors: [],
+                    description: 'Radar occupancy detection'
+                },
+                'Fan Module': {
+                    sensors: ['PWM', 'GP8403', 'Nextion'],
+                    newSensors: [],
+                    description: 'Fan control with touchscreen'
                 }
             };
             
-            // Create categorized sensor groups
-            Object.entries(sensorCategories).forEach(([categoryName, categoryData]) => {
-                const availableSensors = categoryData.sensors.filter(sensor => 
-                    allAddonSensors.includes(sensor) || sensor === 'Sen55x' || sensor === 'HLK2450'
+            // Create categorized expansion module groups
+            Object.entries(moduleCategories).forEach(([categoryName, categoryData]) => {
+                const availableModules = categoryData.sensors.filter(sensor => 
+                    allExpansionModules.includes(sensor) || sensor === 'Sen55x' || sensor === 'HLK2450'
                 );
                 
-                if (availableSensors.length > 0) {
-                    console.log(`Creating category: ${categoryName} with sensors:`, availableSensors);
+                if (availableModules.length > 0) {
+                    console.log(`Creating module: ${categoryName} with components:`, availableModules);
                     // Create category header
                     const categoryHeader = document.createElement('div');
                     categoryHeader.className = 'sensor-category-header';
@@ -175,7 +183,7 @@
                     const categoryContainer = document.createElement('div');
                     categoryContainer.className = 'sensor-category-container';
                     
-                    availableSensors.forEach(sensor => {
+                    availableModules.forEach(sensor => {
                         const checkbox = document.createElement('input');
                         checkbox.type = 'checkbox';
                         checkbox.id = `addon-${sensor}`;
@@ -261,20 +269,20 @@
             }
         }
         
-        // Toggle addon sensors visibility
-        function toggleAddonSensors() {
+        // Toggle expansion modules visibility
+        function toggleExpansionModules() {
             const container = document.getElementById('addon-sensors-filter');
-            const toggleButton = document.getElementById('addon-sensors-toggle');
+            const toggleButton = document.getElementById('expansion-modules-toggle');
             const expandIcon = document.getElementById('expand-icon');
             
             if (container.classList.contains('collapsed')) {
                 container.classList.remove('collapsed');
-                expandIcon.textContent = '▲';
-                toggleButton.innerHTML = '<span id="expand-icon">▲</span> Hide Options';
+                expandIcon.textContent = '▼';
+                toggleButton.innerHTML = '<span id="expand-icon">▼</span> Hide Modules';
             } else {
                 container.classList.add('collapsed');
-                expandIcon.textContent = '▼';
-                toggleButton.innerHTML = '<span id="expand-icon">▼</span> Show Options';
+                expandIcon.textContent = '▶';
+                toggleButton.innerHTML = '<span id="expand-icon">▶</span> Show Modules';
             }
         }
 
@@ -328,9 +336,9 @@
                 <div class="filter-row">
                     <div class="sensor-filters">
                         <div class="addon-sensors-header">
-                            <label>Addon Sensors:</label>
-                            <button id="addon-sensors-toggle" class="expand-button" onclick="toggleAddonSensors()">
-                                <span id="expand-icon">▼</span> Show Options
+                            <label>Expansion Modules:</label>
+                            <button id="expansion-modules-toggle" class="expand-button" onclick="toggleExpansionModules()">
+                                <span id="expand-icon">▶</span> Show Modules
                             </button>
                         </div>
                         <div id="addon-sensors-filter" class="sensor-checkboxes collapsed"></div>
