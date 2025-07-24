@@ -37,7 +37,7 @@ class GitHubPagesAutomation:
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f"[{timestamp}] {message}")
     
-    def extract_metadata_from_path(self, file_path: Path) -> dict:
+    def extract_metadata_from_path(self, file_path: Path) -> dict | None:
         """Extract metadata from Model/Variant directory structure and filename."""
         parts = file_path.parts
         
@@ -100,7 +100,7 @@ class GitHubPagesAutomation:
         }
         return mapping.get(chip_family, chip_family)
     
-    def get_firmware_metadata_from_release_notes(self, model: str, variant: str, version: str, channel: str, sensor_addon: str = None) -> dict:
+    def get_firmware_metadata_from_release_notes(self, model: str, variant: str, version: str, channel: str, sensor_addon: str | None = None) -> dict:
         """Get firmware metadata from release notes file."""
         # Create release notes filename (ensure version has 'v' prefix)
         version_with_v = version if version.startswith('v') else f"v{version}"
@@ -111,9 +111,9 @@ class GitHubPagesAutomation:
         # Look for release notes in the Model/Variant directory
         release_notes_path = self.firmware_dir / model / variant / release_notes_filename
         
-        # Default metadata
+        # Default metadata for modular platform
         metadata = {
-            'description': f'{channel.title()} firmware release for {model} {variant} devices',
+            'description': f'{channel.title()} firmware release for {model} {variant} with Core Module support',
             'model': model,
             'variant': variant,
             'builtin_sensors': ['Temperature', 'Humidity'],
@@ -158,7 +158,8 @@ class GitHubPagesAutomation:
                     sensors = [s.strip() for s in builtin_match.group(1).split(',')]
                     metadata['builtin_sensors'] = sensors
                 
-                addon_match = re.search(r'[*\-\s]*Addon Sensors[*\s]*:\s*(.+)', device_info)
+                # Support both legacy "Addon Sensors" and new "Expansion Modules" terminology
+                addon_match = re.search(r'[*\-\s]*(?:Addon Sensors|Expansion Modules)[*\s]*:\s*(.+)', device_info)
                 if addon_match:
                     addon_text = addon_match.group(1).strip()
                     if addon_text.lower() != 'none':
@@ -271,7 +272,7 @@ class GitHubPagesAutomation:
             self.log(f"ERROR: Failed to clean up orphaned manifests: {e}")
             return False
     
-    def get_build_date(self, file_path: Path, release_metadata: dict = None) -> str:
+    def get_build_date(self, file_path: Path, release_metadata: dict | None = None) -> str:
         """Get build date from release notes, git commit, or file modification time."""
         # First priority: Release Date from .md file
         if release_metadata and 'release_date' in release_metadata:
@@ -366,7 +367,7 @@ class GitHubPagesAutomation:
         """Create main manifest.json file."""
         try:
             manifest = {
-                "name": "Sense360 ESP32 Firmware",
+                "name": "Sense360 Modular Platform Firmware",
                 "version": "1.0.0",
                 "home_assistant_domain": "esphome",
                 "new_install_skip_erase": False,
